@@ -1,5 +1,5 @@
 require("dotenv").config(); //importe 'dotenv' qui nous permettra de récupérer les données du fichier .env
-const mysql = require("mysql2/promise"); //
+const mysql = require("mysql2/promise"); 
 
 const database = mysql.createPool({
     host : process.env.DB_HOST, // adresse du serveur
