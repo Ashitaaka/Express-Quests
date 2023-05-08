@@ -51,11 +51,13 @@ const postMovie = (req, res) => {
   });
 };
 
+// Envoi une requête PUT pour modifier un Movie dans la BDD
 const updateMovie = (req, res) =>{
   const {title, director, year, color, duration} = req.body;
   const id = parseInt(req.params.id);
 
-  database.query("UPDATE movies SET title = ?, director = ?, year = ?, color = ?, duration = ? WHERE id = ?", [title, director, year, color, duration, id])
+  database
+  .query("UPDATE movies SET title = ?, director = ?, year = ?, color = ?, duration = ? WHERE id = ?", [title, director, year, color, duration, id])
 
   .then(([result])=>{
     //The AffectedRows() method returns the number of rows affected by the last SQL INSERT, DELETE, or UPDATE
@@ -68,14 +70,35 @@ const updateMovie = (req, res) =>{
 
   .catch((err) =>{
     console.error(err);
-    res.status(500).send("movie haven't been updated")
+    res.status(500).send("movie hasn't been updated")
   })
+}
+
+// Envoi une requête DELETE pour supprimer un Movie dans la BDD
+const deleteMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("DELETE FROM movies WHERE id = ?", [id])
+
+    .then(([result]) =>{
+      if(result.affectedRows === 0){
+        res.status(404).send('Not found');
+      } else{
+        res.sendStatus(204);
+      }
+    })
+
+    .catch((err) =>{
+      console.error(err);
+      res.status(500).send("Error - movie hasn't been deleted")
+    });
 }
 
 // Envoi d'une requête à la BDD pour récupérer tous les users
 const getUsers = (req, res) =>{
   database
-    .query('SELECT * FROM users')
+    .query("SELECT * FROM users")
     .then(([users])=>{
       res.status(200).json(users);
     })
@@ -90,7 +113,7 @@ const getUserById = (req, res) =>{
   const userId = parseInt(req.params.id);
 
   database
-    .query('SELECT * FROM users WHERE id=?', [userId])
+    .query("SELECT * FROM users WHERE id=?", [userId])
     .then(([users])=>{
       if(users[0] != null){
         res.json(users[0]).status(200);
@@ -127,7 +150,7 @@ const updateUser = (req, res) =>{
   const {firstname, lastname, email, city, language} = req.body;
 
   database
-    .query('UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?', [firstname, lastname, email, city, language, id])
+    .query("UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?", [firstname, lastname, email, city, language, id])
 
     .then(([result]) =>{
       if(result.affectedRows === 0){
@@ -143,6 +166,26 @@ const updateUser = (req, res) =>{
     });
 }
 
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("delete from users where id = ?", [id])
+
+    .then(([result]) => {
+      if(result.affectedRows === 0){
+        res.status(404).send("Not Found")
+      }else{
+        res.sendStatus(204);
+      }
+    })
+
+    .catch((err) =>{
+      console.error(err)
+      res.status(500).send("Error - User hasn't been deleted")
+    })
+}
+
 
 module.exports = {
   getMovies,
@@ -152,5 +195,7 @@ module.exports = {
   postMovie,
   postUser,
   updateMovie,
-  updateUser
+  updateUser,
+  deleteMovie,
+  deleteUser
 };
