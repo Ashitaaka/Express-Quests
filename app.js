@@ -25,14 +25,17 @@ app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
 
+// !! Validators : 'Middleware' to check if the request POST and PUT are valid
+const validators = require("./validators.js")
+
 // Routes POST
-app.post("/api/movies", movieHandlers.postMovie);
-app.post("/api/users", movieHandlers.postUser);
+app.post("/api/movies", validators.validateMovie, movieHandlers.postMovie);
+app.post("/api/users", validators.validateUser, movieHandlers.postUser);
 
 
 //Routes PUT
-app.put("/api/movies/:id", movieHandlers.updateMovie);
-app.put("/api/users/:id", movieHandlers.updateUser)
+app.put("/api/movies/:id", validators.validateMovie, movieHandlers.updateMovie);
+app.put("/api/users/:id", validators.validateUser, movieHandlers.updateUser)
 
 //Routes DELETE
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
