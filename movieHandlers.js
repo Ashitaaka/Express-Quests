@@ -51,6 +51,27 @@ const postMovie = (req, res) => {
   });
 };
 
+const updateMovie = (req, res) =>{
+  const {title, director, year, color, duration} = req.body;
+  const id = parseInt(req.params.id);
+
+  database.query("UPDATE movies SET title = ?, director = ?, year = ?, color = ?, duration = ? WHERE id = ?", [title, director, year, color, duration, id])
+
+  .then(([result])=>{
+    //The AffectedRows() method returns the number of rows affected by the last SQL INSERT, DELETE, or UPDATE
+    if(result.affectedRows === 0){
+      res.status(404).send("Not found")
+    }else{
+      res.sendStatus(204)
+    }
+  })
+
+  .catch((err) =>{
+    console.error(err);
+    res.status(500).send("movie haven't been updated")
+  })
+}
+
 // Envoi d'une requête à la BDD pour récupérer tous les users
 const getUsers = (req, res) =>{
   database
@@ -84,13 +105,12 @@ const getUserById = (req, res) =>{
 };
 
 // Envoi une requête POST pour créer un nouveau User dans la BDD
-
 const postUser = (req, res) =>{
   const {firstname, lastname, email, city, language} = req.body; // on récupère l'objet json envoyé en 'req'
 
   database
    .query(" INSERT INTO users (firstname, lastname, email, city, language) VALUES (?,?,?,?,?)", [firstname, lastname, email, city, language])
-   
+
    .then(([result]) => {
     res.location(`api/users/${result.insertId}`).sendStatus(201)
    })
@@ -101,6 +121,28 @@ const postUser = (req, res) =>{
    })
 }
 
+// Envoi une requête PUT pour modifier un User dans la BDD
+const updateUser = (req, res) =>{
+  const id = parseInt(req.params.id);
+  const {firstname, lastname, email, city, language} = req.body;
+
+  database
+    .query('UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?', [firstname, lastname, email, city, language, id])
+
+    .then(([result]) =>{
+      if(result.affectedRows === 0){
+        res.status(404).send("not found");
+      }else{
+        res.sendStatus(204);
+      }
+    })
+
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error - couldn't update the user")
+    });
+}
+
 
 module.exports = {
   getMovies,
@@ -109,4 +151,6 @@ module.exports = {
   getUserById,
   postMovie,
   postUser,
+  updateMovie,
+  updateUser
 };
