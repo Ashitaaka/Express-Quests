@@ -2,8 +2,26 @@ const database = require("./database"); // importe le fichier database.
 
 // Envoi d'une requête à la BDD pour récupérer tous les films
 const getMovies = (req, res) => {
+  let sql = 'SELECT * FROM movies';
+  const sqlValue = [];
+
+  if(req.query.max_duration && req.query.color){
+    sql += ' WHERE duration <= ? AND WHERE color = ?'
+    sqlValue.push(req.query.max_duration, req.query.color)
+  }
+
+  if(req.query.max_duration){
+    sql += ' WHERE duration <= ?'
+    sqlValue.push(req.query.max_duration)
+  }
+
+  if(req.query.color){
+    sql += ' WHERE color = ?'
+    sqlValue.push(req.query.color)
+  }
+
   database
-  .query('SELECT * FROM movies') // Méthode pour envoyer une requête - query('requête_SQL_entre_guillemets')
+  .query(sql, sqlValue) // Méthode pour envoyer une requête - query('requête_SQL_entre_guillemets')
   .then(([movies])=>{ //Destructuring pr récupérer index 0 du tableau de réponse qui contient la liste des films
     res.json(movies); //renvoi la liste des films en json
   })
@@ -97,8 +115,25 @@ const deleteMovie = (req, res) => {
 
 // Envoi d'une requête à la BDD pour récupérer tous les users
 const getUsers = (req, res) =>{
+  let sql = 'SELECT * FROM users';
+  const sqlValue = [];
+
+  if(req.query.city){
+    sql += ' WHERE city = ?'
+    sqlValue.push(req.query.city)
+
+    if(req.query.language){
+      sql += ' AND language = ?'
+      sqlValue.push(req.query.language)
+    }
+
+  }else if(req.query.language){
+    sql += ' WHERE language = ?'
+    sqlValue.push(req.query.language)
+  }
+
   database
-    .query("SELECT * FROM users")
+  .query(sql, sqlValue)
     .then(([users])=>{
       res.status(200).json(users);
     })

@@ -1,4 +1,5 @@
 const Joi = require("joi");
+//npm install joi
 //Using Joi to validate the req.body infos
 
 const userSchema = Joi.object({

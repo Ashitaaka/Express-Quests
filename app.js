@@ -1,7 +1,9 @@
 require("dotenv").config();
-//indique que nous avons besoin de variables d'environnement accessible dans le ficjhier .env
+//npm install dotenv
+//indique que nous avons besoin de variables d'environnement accessible dans le fichier .env
 
 const express = require("express");
+//npm install express
 
 const app = express();
 app.use(express.json()); // 'middleware' express qui permet de lire les body des requêtes au format "json"
