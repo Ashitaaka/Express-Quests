@@ -114,7 +114,7 @@ const deleteMovie = (req, res) => {
 }
 
 // Envoi d'une requête à la BDD pour récupérer tous les users
-const getUsers = (req, res) =>{
+const getUsers = (req, res, next) =>{
   let sql = 'SELECT * FROM users';
   const sqlValue = [];
 
@@ -135,7 +135,10 @@ const getUsers = (req, res) =>{
   database
   .query(sql, sqlValue)
     .then(([users])=>{
-      res.status(200).json(users);
+      // res.status(200).json(users);
+      //j'envoie la réponse "users" à mon middleware qui sera responsable d'effacer le hashedPassword de la réponse
+      res.users = users;
+      next();
     })
     .catch((err)=>{
       console.error(err);
@@ -144,14 +147,16 @@ const getUsers = (req, res) =>{
 };
 
 // Envoi d'une requête à la BDD pour récupérer un user par id
-const getUserById = (req, res) =>{
+const getUserById = (req, res, next) =>{
   const userId = parseInt(req.params.id);
 
   database
     .query("SELECT * FROM users WHERE id=?", [userId])
     .then(([users])=>{
       if(users[0] != null){
-        res.json(users[0]).status(200);
+        //j'envoie la réponse "users" à mon middleware qui sera responsable d'effacer le hashedPassword de la réponse
+        res.users = users;
+        next();
       }else{
         res.status(404).send('Not found');
       };
@@ -164,10 +169,10 @@ const getUserById = (req, res) =>{
 
 // Envoi une requête POST pour créer un nouveau User dans la BDD
 const postUser = (req, res) =>{
-  const {firstname, lastname, email, city, language} = req.body; // on récupère l'objet json envoyé en 'req'
+  const {firstname, lastname, email, city, language, hashedPassword} = req.body; // on récupère l'objet json envoyé en 'req'
 
   database
-   .query(" INSERT INTO users (firstname, lastname, email, city, language) VALUES (?,?,?,?,?)", [firstname, lastname, email, city, language])
+   .query(" INSERT INTO users (firstname, lastname, email, city, language, hashedPassword) VALUES (?,?,?,?,?,?)", [firstname, lastname, email, city, language, hashedPassword])
 
    .then(([result]) => {
     res.location(`api/users/${result.insertId}`).sendStatus(201)
@@ -182,10 +187,10 @@ const postUser = (req, res) =>{
 // Envoi une requête PUT pour modifier un User dans la BDD
 const updateUser = (req, res) =>{
   const id = parseInt(req.params.id);
-  const {firstname, lastname, email, city, language} = req.body;
+  const {firstname, lastname, email, city, language, hashedPassword} = req.body;
 
   database
-    .query("UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?", [firstname, lastname, email, city, language, id])
+    .query("UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ?, hashedPassword = ? WHERE id = ?", [firstname, lastname, email, city, language, hashedPassword, id])
 
     .then(([result]) =>{
       if(result.affectedRows === 0){
@@ -217,7 +222,7 @@ const deleteUser = (req, res) => {
 
     .catch((err) =>{
       console.error(err)
-      res.status(500).send("Error - User hasn't been deleted")
+      res.status(500).send("Error - User hasn't been updated")
     })
 }
 

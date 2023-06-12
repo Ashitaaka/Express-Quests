@@ -6,14 +6,15 @@ const userSchema = Joi.object({
     firstname: Joi.string().max(255).required(),
     lastname: Joi.string().max(255).required(),
     email: Joi.string().email().max(255).required(),
+    hashedPassword : Joi.string().max(255).required()
 }) //define the "schema" which validate the datas
 
 
 const validateUser = (req, res, next) => {
-    const {firstname, lastname, email} = req.body;
+    const {firstname, lastname, email, hashedPassword} = req.body;
 
     const { error } = userSchema.validate(
-        { firstname, lastname, email },
+        { firstname, lastname, email, hashedPassword },
         { abortEarly : false}
     ); //getting the eventual errors
 

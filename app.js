@@ -5,6 +5,9 @@ require("dotenv").config();
 const express = require("express");
 //npm install express
 
+const { hashPassword, hidePassword } = require('./auth');
+//récupère la fonction nécessaire au hash ET au masquage des passwords
+
 const app = express();
 app.use(express.json()); // 'middleware' express qui permet de lire les body des requêtes au format "json"
 
@@ -21,8 +24,8 @@ app.get("/", welcome);
 const movieHandlers = require("./movieHandlers");
 
 // Routes GET
-app.get("/api/users", movieHandlers.getUsers);
-app.get("/api/users/:id", movieHandlers.getUserById);
+app.get("/api/users", movieHandlers.getUsers, hidePassword);
+app.get("/api/users/:id", movieHandlers.getUserById, hidePassword);
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
@@ -32,12 +35,12 @@ const validators = require("./validators.js")
 
 // Routes POST
 app.post("/api/movies", validators.validateMovie, movieHandlers.postMovie);
-app.post("/api/users", validators.validateUser, movieHandlers.postUser);
+app.post("/api/users", hashPassword, validators.validateUser, movieHandlers.postUser);
 
 
 //Routes PUT
 app.put("/api/movies/:id", validators.validateMovie, movieHandlers.updateMovie);
-app.put("/api/users/:id", validators.validateUser, movieHandlers.updateUser)
+app.put("/api/users/:id", hashPassword, validators.validateUser, movieHandlers.updateUser)
 
 //Routes DELETE
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
