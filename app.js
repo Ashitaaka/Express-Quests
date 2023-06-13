@@ -2,18 +2,33 @@ require("dotenv").config();
 //npm install dotenv
 //indique que nous avons besoin de variables d'environnement accessible dans le fichier .env
 
+
+const port = process.env.APP_PORT ?? 5001;
+// Instancie le port avec la valeur contenue dans la variable d'environement 'APP_PORT' du fichier .env
+// Si il n'y a pas de valeur dans le fichier .env, alors la valeur par default est 5001
+
 const express = require("express");
 //npm install express
-
-const { hashPassword, hidePassword } = require('./auth');
-//récupère la fonction nécessaire au hash ET au masquage des passwords
 
 const app = express();
 app.use(express.json()); // 'middleware' express qui permet de lire les body des requêtes au format "json"
 
-const port = process.env.APP_PORT ?? 5001;
-//instancie le port avec la valeur contenue dans la variable d'environement 'APP_PORT' du fichier .env
-//Si il n'y a pas de valeur dans le fichier .env, alors la valeur par default est 5001
+const { hashPassword, hidePassword, verifyPassword } = require('./auth');
+// récupère les fonctions nécessaires au hash ET au masquage des passwords
+
+const { validateUser, validateMovie } = require("./validators.js")
+// !! Validators : 'Middleware' to check if the request POST and PUT are valid
+
+const { login, getUserByEmailWithPasswordAndPassToNext } = require ("./login.js")
+// Middleware to Get a user by his email and send it to password validation
+
+const { getMovies, getMovieById, postMovie, updateMovie, deleteMovie} = require("./movieHandlers");
+// Movies Middlewares
+
+const { getUsers, getUserById, postUser, updateUser, deleteUser } = require("./userHandlers");
+// Users Middlewares
+
+
 
 const welcome = (req, res) => {
   res.send("Welcome to my favourite movie list");
@@ -21,30 +36,27 @@ const welcome = (req, res) => {
 
 app.get("/", welcome);
 
-const movieHandlers = require("./movieHandlers");
 
 // Routes GET
-app.get("/api/users", movieHandlers.getUsers, hidePassword);
-app.get("/api/users/:id", movieHandlers.getUserById, hidePassword);
-app.get("/api/movies", movieHandlers.getMovies);
-app.get("/api/movies/:id", movieHandlers.getMovieById);
+app.get("/api/users", getUsers, hidePassword);
+app.get("/api/users/:id", getUserById, hidePassword);
+app.get("/api/movies", getMovies);
+app.get("/api/movies/:id", getMovieById);
 
-
-// !! Validators : 'Middleware' to check if the request POST and PUT are valid
-const validators = require("./validators.js")
 
 // Routes POST
-app.post("/api/movies", validators.validateMovie, movieHandlers.postMovie);
-app.post("/api/users", hashPassword, validators.validateUser, movieHandlers.postUser);
+app.post("/api/movies", validateMovie, postMovie);
+app.post("/api/users", hashPassword, validateUser, postUser);
+app.post("/api/login", getUserByEmailWithPasswordAndPassToNext, verifyPassword);
 
 
 //Routes PUT
-app.put("/api/movies/:id", validators.validateMovie, movieHandlers.updateMovie);
-app.put("/api/users/:id", hashPassword, validators.validateUser, movieHandlers.updateUser)
+app.put("/api/movies/:id", validateMovie, updateMovie);
+app.put("/api/users/:id", hashPassword, validateUser, updateUser)
 
 //Routes DELETE
-app.delete("/api/movies/:id", movieHandlers.deleteMovie);
-app.delete("/api/users/:id", movieHandlers.deleteUser);
+app.delete("/api/movies/:id", deleteMovie);
+app.delete("/api/users/:id", deleteUser);
 
 app.listen(port, (err) => {
   if (err) {

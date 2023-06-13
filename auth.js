@@ -35,7 +35,25 @@ const hidePassword = (req, res) =>{
     res.status(200).json(users);
 }
 
+const verifyPassword = (req, res) => {
+
+    argon2
+        .verify(req.user.hashedPassword, req.body.password)
+        .then((isVerified) => {
+            if(!isVerified){
+                res.sendStatus(401);
+            }else{
+                res.send("Credentials are valid");
+            }
+        })
+        .catch((err) => {
+            console.error(err)
+            res.status(500).send("Error retreiving from database")
+        })
+  }
+
 module.exports = {
     hashPassword,
     hidePassword,
+    verifyPassword,
 };
